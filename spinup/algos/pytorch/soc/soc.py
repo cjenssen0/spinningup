@@ -158,10 +158,7 @@ def soc(env_fn, actor_critic=core.MLPOptionCritic, ac_kwargs=dict(), seed=0,
 
     env, test_env = env_fn(), env_fn()
     obs_dim = env.observation_space.shape
-    act_dim = env.action_space.shape[0]
-
-    # Action limit for clamping: critically, assumes all dimensions share the same bound!
-    act_limit = env.action_space.high[0]
+    act_dim = env.action_space.n
 
     # Create actor-critic module and target networks
     ac = actor_critic(env.observation_space, env.action_space, N_options,
@@ -190,7 +187,7 @@ def soc(env_fn, actor_critic=core.MLPOptionCritic, ac_kwargs=dict(), seed=0,
         o, w, a, r, o2, d = data['obs'], data['option'], data['act'], data['rew'], data['obs2'], data['done']
 
         # Get action- and option-values
-        Qu = ac.q(o, w, a)
+        Qu = ac.q(o, w)
         Qw = ac.Qw(o)
 
         # Get Qw and beta for the given options
@@ -237,7 +234,7 @@ def soc(env_fn, actor_critic=core.MLPOptionCritic, ac_kwargs=dict(), seed=0,
         Qu_pi = ac.q(o, w, pi_action)
 
         # Entropy-regularized policy loss
-        loss_pi = (alpha*logp_pi - Qu_pi).mean()
+        loss_pi = pi ^ T(alpha*logp_pi - Qu_pi).mean()
 
         # values for "beta-target"
         with torch.no_grad():
