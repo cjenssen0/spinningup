@@ -241,7 +241,7 @@ def soc(env_fn, actor_critic=core.MLPOptionCritic, ac_kwargs=dict(), seed=0,
 
         # values for "beta-target"
         with torch.no_grad():
-            Qw_next = ac.Qw(o2)
+            Qw_next = ac_targ.Qw(o2)
             V_next = Qw_next.max(-1).values
             Qw_next = Qw_next.gather(-1, w).squeeze(-1)
             Aw = (Qw_next - V_next) + c
@@ -260,7 +260,7 @@ def soc(env_fn, actor_critic=core.MLPOptionCritic, ac_kwargs=dict(), seed=0,
     q_optimizer = Adam(q_params, lr=lr)
     Qw_optimizer = Adam(ac.Qw.parameters(), lr=lr)
     pi_optimizer = Adam(ac.pi.parameters(), lr=lr)
-    beta_optimizer = Adam(ac.pi.beta.parameters(), lr=lr)
+    beta_optimizer = Adam(ac.pi.parameters(), lr=lr)
 
     # Set up model saving
     logger.setup_pytorch_saver(ac)
